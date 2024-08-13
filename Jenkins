@@ -1,27 +1,66 @@
-node{
-    echo " My build number : ${env.BUILD_NUMBER}"
-    
-    echo " My Branch name : ${env.BRANCH_NAME}"
-    echo " My Job  name : ${env.JOB_NAME}"
-    def MavenHome = tool name: 'maven3.9.6'
+def SendNotifications(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESS'
 
-    stage('CheckoutCode'){
-        git branch: 'development', url: 'https://github.com/diwadev/maven-web-application.git'
-    }
-    stage("BuildCode"){
-        sh "${MavenHome}/bin/mvn clean package"
-    }
-    stage("ExecuteSonarQubeReport"){
-        sh "${MavenHome}/bin/mvn sonar:sonar"
-    }
-    stage("UploadArtifactsintoNexus"){
-        sh "${MavenHome}/bin/mvn deploy"
-    }
-    stage('DeployApplicationIntoTomacatServer'){
-    sshagent(['abe9d401-5d53-4baa-96c6-4dc37445a115']){
-    // some block
-    
-    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.47.52:/opt/apache-tomcat-9.0.91/webapps/"
-    }
-}  
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESS') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  }else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: summary)
+}
+
+node {       
+
+		echo " My build number : ${env.BUILD_NUMBER}"
+
+		echo " My Branch name : ${env.BRANCH_NAME}"
+		echo " My Job  name : ${env.JOB_NAME}"
+		def MavenHome = tool name: 'maven3.9.6'
+		
+    try {
+		
+		SendNotifications('STARTED')
+		stage('CheckoutCode'){
+			git branch: 'development', url: 'https://github.com/diwadev/maven-web-application.git'
+		}
+		stage("BuildCode"){
+			sh "${MavenHome}/bin/mvn clean package"
+		}
+		stage("ExecuteSonarQubeReport"){
+			sh "${MavenHome}/bin/mvn sonar:sonar"
+		}
+		stage("UploadArtifactsintoNexus"){
+			sh "${MavenHome}/bin/mvn deploy"
+		}
+		stage('DeployApplicationIntoTomacatServer'){
+		sshagent(['abe9d401-5d53-4baa-96c6-4dc37445a115']){
+		// some block
+
+		sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.47.52:/opt/apache-tomcat-9.0.91/webapps/"
+		}
+        }
+
+  } catch (e) {
+    // If there was an exception thrown, the build failed
+    currentBuild.result = "FAILED"
+    throw e
+  }finally {
+    // Success or failure, always send notifications
+    SendNotifications(currentBuild.result)
+  }
 }
