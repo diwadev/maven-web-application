@@ -39,7 +39,7 @@ node {
 			git branch: 'development', url: 'https://github.com/diwadev/maven-web-application.git'
 		}
 		stage("BuildCode"){
-			sh "${MavenHome}/bin/mvn clean package"
+			sh "${MavenHome}/bin/mvn clean packag"
 		}
 		stage("ExecuteSonarQubeReport"){
 			sh "${MavenHome}/bin/mvn sonar:sonar"
