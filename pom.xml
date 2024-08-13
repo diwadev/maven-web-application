@@ -21,7 +21,7 @@
 		<spring.version>5.1.2.RELEASE</spring.version>
 		<junit.version>4.11</junit.version>
 		<log4j.version>1.2.17</log4j.version>
-		<sonar.host.url>http://13.201.22.122:9000/</sonar.host.url>
+		<sonar.host.url>http://13.233.251.193:9000/</sonar.host.url>
 		<sonar.login>admin</sonar.login>
 		<sonar.password>Passw0rd</sonar.password> 
 	
@@ -99,13 +99,13 @@
 	    <repository>
 	      <id>nexus</id>
 	      <name>Diwakarreddy Releases Nexus Repository</name>
-	      <url>http://3.109.123.203:9980/diwakarreddy/repository/facebook-release/</url>
+	      <url>http://3.108.238.112/:9980/diwakarreddy/repository/facebook-release/</url>
 	    </repository>
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>Diwakarreddy Snapshot Nexus Repository </name>
-	      <url>http://3.109.123.203:9980/diwakarreddy/repository/facebook-snapshot/</url>
+	      <url>http://3.108.238.112/:9980/diwakarreddy/repository/facebook-snapshot/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
